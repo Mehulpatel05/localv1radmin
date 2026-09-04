@@ -66,7 +66,11 @@ function Login({ onLogin }) {
       const res = await fetch(`${API_BASE}/api/v1/moderation/verify-mfa`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pre_auth_token: preAuthToken, mfa_code: mfaCode })
+        body: JSON.stringify({ 
+          email: email,
+          preAuthToken: preAuthToken, 
+          mfaCode: mfaCode 
+        })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || 'MFA failed');
