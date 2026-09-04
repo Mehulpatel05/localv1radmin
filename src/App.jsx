@@ -49,7 +49,7 @@ function Login({ onLogin }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || (data.error && data.error.message) || 'Request failed');
       
-      setPreAuthToken(data.pre_auth_token);
+      setPreAuthToken(data.preAuthToken);
       setStep(2);
     } catch (err) {
       setError(err.message);
