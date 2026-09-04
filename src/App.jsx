@@ -162,8 +162,9 @@ function QueueTab({ token }) {
         headers: { 'x-moderator-token': token }
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || 'Failed to fetch queue');
-      setQueue(data.items || []);
+      const errorMessage = data.error?.message || data.detail || 'Failed to fetch queue';
+      if (!res.ok) throw new Error(errorMessage);
+      setQueue(data.items || data.queue || []);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -288,7 +289,8 @@ function AllUsersTab({ token }) {
         headers: { 'x-moderator-token': token }
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || 'Failed to fetch users');
+      const errorMessage = data.error?.message || data.detail || 'Failed to fetch users';
+      if (!res.ok) throw new Error(errorMessage);
       setUsers(data.users || []);
     } catch (err) {
       setError(err.message);
@@ -366,7 +368,8 @@ function CategoriesTab({ token }) {
         headers: { 'x-moderator-token': token }
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || 'Failed to fetch posts');
+      const errorMessage = data.error?.message || data.detail || 'Failed to fetch posts';
+      if (!res.ok) throw new Error(errorMessage);
       setPosts(data.posts || []);
     } catch (err) {
       setError(err.message);
