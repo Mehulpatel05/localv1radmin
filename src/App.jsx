@@ -124,28 +124,144 @@ function Login({ onLogin }) {
 }
 
 function Dashboard({ token, onLogout }) {
-  const [activeTab, setActiveTab] = useState('queue');
+  const [activeTab, setActiveTab] = useState('dashboard');
+
+  const categories = [
+    { id: 'cat_traffic', label: '🚦 Traffic', val: 'traffic' },
+    { id: 'cat_services', label: '🛠️ Services', val: 'services' },
+    { id: 'cat_food', label: '🍔 Food', val: 'food' },
+    { id: 'cat_educationJobs', label: '💼 Education/Jobs', val: 'educationJobs' },
+    { id: 'cat_general', label: '💬 General', val: 'general' },
+    { id: 'cat_emergency', label: '🚑 Emergency', val: 'emergency' }
+  ];
+
+  const renderContent = () => {
+    if (activeTab === 'dashboard') return <OverviewTab token={token} />;
+    if (activeTab === 'queue') return <QueueTab token={token} />;
+    if (activeTab === 'all_users') return <AllUsersTab token={token} />;
+    if (activeTab === 'ban') return <BanUserTab token={token} />;
+    
+    const matchedCategory = categories.find(c => c.id === activeTab);
+    if (matchedCategory) {
+      return <CategoriesTab token={token} category={matchedCategory.val} label={matchedCategory.label} />;
+    }
+    return null;
+  };
 
   return (
-    <div className="animate-fade-in" style={{ padding: '30px', maxWidth: '1200px', margin: '0 auto' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Admin Dashboard</h1>
-        <button className="btn" style={{ background: 'var(--surface)', color: 'white', border: '1px solid var(--border)' }} onClick={onLogout}>
-          Sign Out
-        </button>
-      </header>
+    <div className="dashboard-layout animate-fade-in">
+      <aside className="sidebar">
+        <div className="sidebar-brand">
+          Vadodara Admin
+        </div>
+        
+        <nav className="sidebar-nav">
+          <button 
+            className={`sidebar-link ${activeTab === 'dashboard' ? 'active' : ''}`}
+            onClick={() => setActiveTab('dashboard')}
+          >
+            📊 Dashboard
+          </button>
+          
+          <div className="sidebar-label">Moderation</div>
+          <button 
+            className={`sidebar-link ${activeTab === 'queue' ? 'active' : ''}`}
+            onClick={() => setActiveTab('queue')}
+          >
+            🚨 Moderation Queue
+          </button>
+          <button 
+            className={`sidebar-link ${activeTab === 'all_users' ? 'active' : ''}`}
+            onClick={() => setActiveTab('all_users')}
+          >
+            👥 All Users
+          </button>
+          <button 
+            className={`sidebar-link ${activeTab === 'ban' ? 'active' : ''}`}
+            onClick={() => setActiveTab('ban')}
+          >
+            🚫 Manual Ban
+          </button>
+          
+          <div className="sidebar-label">Categories</div>
+          {categories.map(cat => (
+            <button 
+              key={cat.id}
+              className={`sidebar-link ${activeTab === cat.id ? 'active' : ''}`}
+              onClick={() => setActiveTab(cat.id)}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </nav>
+      </aside>
 
-      <div style={{ display: 'flex', gap: '15px', marginBottom: '30px', borderBottom: '1px solid var(--border)', paddingBottom: '15px', overflowX: 'auto' }}>
-        <button onClick={() => setActiveTab('queue')} className="btn" style={{ background: activeTab === 'queue' ? 'var(--primary)' : 'transparent', color: 'white', border: activeTab === 'queue' ? 'none' : '1px solid var(--border)' }}>Moderation Queue</button>
-        <button onClick={() => setActiveTab('all_users')} className="btn" style={{ background: activeTab === 'all_users' ? 'var(--primary)' : 'transparent', color: 'white', border: activeTab === 'all_users' ? 'none' : '1px solid var(--border)' }}>All Users</button>
-        <button onClick={() => setActiveTab('categories')} className="btn" style={{ background: activeTab === 'categories' ? 'var(--primary)' : 'transparent', color: 'white', border: activeTab === 'categories' ? 'none' : '1px solid var(--border)' }}>Categories & Content</button>
-        <button onClick={() => setActiveTab('ban')} className="btn" style={{ background: activeTab === 'ban' ? 'var(--primary)' : 'transparent', color: 'white', border: activeTab === 'ban' ? 'none' : '1px solid var(--border)' }}>Manual Ban</button>
+      <main className="main-content">
+        <header style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '32px' }}>
+          <button className="btn" style={{ background: 'var(--surface)', color: 'white', border: '1px solid var(--border)' }} onClick={onLogout}>
+            Sign Out
+          </button>
+        </header>
+        
+        {renderContent()}
+      </main>
+    </div>
+  );
+}
+
+function OverviewTab({ token }) {
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/moderation/stats`, {
+          headers: { 'x-moderator-token': token }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error?.message || data.detail || 'Failed to fetch stats');
+        setStats(data.stats);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, [token]);
+
+  if (loading) return <div>Loading dashboard...</div>;
+  if (error) return <div style={{ color: 'var(--danger)' }}>{error}</div>;
+
+  return (
+    <div>
+      <h2 style={{ fontSize: '1.5rem', marginBottom: '24px', fontWeight: 'bold' }}>Platform Overview</h2>
+      
+      <div className="stat-grid">
+        <div className="stat-card">
+          <div className="stat-title">Total Users</div>
+          <div className="stat-value">{stats?.totalUsers || 0}</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-title">Total Posts</div>
+          <div className="stat-value">{stats?.totalPosts || 0}</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-title">Pending Reports</div>
+          <div className="stat-value" style={{ color: stats?.pendingReports > 0 ? 'var(--danger)' : 'var(--success)' }}>
+            {stats?.pendingReports || 0}
+          </div>
+        </div>
       </div>
-
-      {activeTab === 'queue' && <QueueTab token={token} />}
-      {activeTab === 'all_users' && <AllUsersTab token={token} />}
-      {activeTab === 'categories' && <CategoriesTab token={token} />}
-      {activeTab === 'ban' && <BanUserTab token={token} />}
+      
+      <div className="glass-panel" style={{ padding: '24px' }}>
+        <h3 style={{ marginBottom: '16px', fontSize: '1.1rem' }}>Welcome to the updated Admin Panel</h3>
+        <p style={{ color: 'var(--text-muted)' }}>
+          Use the sidebar on the left to navigate through different sections of the platform. You can now view posts filtered by category directly from the sidebar.
+        </p>
+      </div>
     </div>
   );
 }
@@ -352,13 +468,10 @@ function AllUsersTab({ token }) {
   );
 }
 
-function CategoriesTab({ token }) {
+function CategoriesTab({ token, category, label }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [category, setCategory] = useState(''); // empty = all categories
-
-  const categoriesList = ['traffic', 'services', 'food', 'educationJobs', 'general', 'emergency'];
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -399,16 +512,7 @@ function CategoriesTab({ token }) {
   return (
     <div className="glass-panel" style={{ padding: '24px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid var(--border)', paddingBottom: '10px' }}>
-        <h2 style={{ fontSize: '1.25rem' }}>Posts by Category</h2>
-        <select 
-          value={category} 
-          onChange={(e) => setCategory(e.target.value)}
-          className="input-field"
-          style={{ width: '200px', padding: '8px', background: '#0f172a' }}
-        >
-          <option value="">All Categories</option>
-          {categoriesList.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
+        <h2 style={{ fontSize: '1.25rem' }}>{label} Posts</h2>
       </div>
       
       {loading ? (
