@@ -47,7 +47,7 @@ function Login({ onLogin }) {
         body: JSON.stringify({ email, password })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || 'Login failed');
+      if (!res.ok) throw new Error(data.detail || (data.error && data.error.message) || 'Request failed');
       
       setPreAuthToken(data.pre_auth_token);
       setStep(2);
