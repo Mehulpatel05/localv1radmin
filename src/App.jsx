@@ -355,7 +355,7 @@ function BanUserTab({ token }) {
           'Content-Type': 'application/json',
           'x-moderator-token': token 
         },
-        body: JSON.stringify({ handle, reason })
+        body: JSON.stringify({ targetHandle: handle, reason })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || 'Failed to ban user');
