@@ -127,12 +127,13 @@ function Dashboard({ token, onLogout }) {
   const [activeTab, setActiveTab] = useState('dashboard');
 
   const categories = [
-    { id: 'cat_traffic', label: '🚦 Traffic', val: 'traffic' },
-    { id: 'cat_services', label: '🛠️ Services', val: 'services' },
-    { id: 'cat_food', label: '🍔 Food', val: 'food' },
-    { id: 'cat_educationJobs', label: '💼 Education/Jobs', val: 'educationJobs' },
-    { id: 'cat_general', label: '💬 General', val: 'general' },
-    { id: 'cat_emergency', label: '🚑 Emergency', val: 'emergency' }
+    { id: 'cat_general', label: '💬 General Chat', val: 'general' },
+    { id: 'cat_services', label: '🔧 Local Services', val: 'services' },
+    { id: 'cat_food', label: '🍲 Food & Cafes', val: 'food' },
+    { id: 'cat_rooms', label: '🏠 Rentals & PG', val: 'rooms' },
+    { id: 'cat_shop', label: '🛍️ Shop', val: 'shop' },
+    { id: 'cat_events', label: '🎉 Events', val: 'events' },
+    { id: 'cat_jobs', label: '💼 Jobs & Referrals', val: 'jobs' }
   ];
 
   const renderContent = () => {
